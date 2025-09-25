@@ -16,7 +16,7 @@ axios.interceptors.response.use(
       try {
         // Attempt to refresh token
         const refreshToken = localStorage.getItem("refreshToken");
-        const res = await axios.post(`${BASE_API_URL}/auth/refresh-token`, {
+        const res = await axios.post(`${BASE_API_URL}/auth/refresh`, {
           token: refreshToken,
         }, {
           headers: {
@@ -26,17 +26,22 @@ axios.interceptors.response.use(
         });
         const user = res.data as LoginResponse;
 
-        localStorage.setItem("token", user.token);
-        localStorage.setItem("refreshToken", user.refreshToken);
-        localStorage.setItem("user", JSON.stringify(user.user));
+          localStorage.setItem("accessToken", user.accessToken);
+          localStorage.setItem("accessTokenExpiresAt", user.accessTokenExpiresAt);
+          localStorage.setItem("refreshToken", user.refreshToken);
+          localStorage.setItem("refreshTokenExpiresAt", user.refreshTokenExpiresAt);
+          localStorage.setItem("user", JSON.stringify(user.user));
 
         // Update Authorization header and retry original request
-        originalRequest.headers.Authorization = `Bearer ${user.token}`;
+        originalRequest.headers.Authorization = `Bearer ${user.accessToken}`;
         return axios(originalRequest);
       } catch (refreshError) {
         // Handle refresh failure (e.g., logout user)
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("accessTokenExpiresAt");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("refreshTokenExpiresAt");
+          localStorage.removeItem("user");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
@@ -47,7 +52,7 @@ axios.interceptors.response.use(
 
 axios.interceptors.request.use(
   (config) => {
-   const token = localStorage.getItem("token"); // Or use your preferred storage
+   const token = localStorage.getItem("accessToken"); // Or use your preferred storage
     if (token && config.url && !config.url.includes('/auth')) {
       config.headers.Authorization = `Bearer ${token}`;
     }

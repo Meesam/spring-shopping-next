@@ -1,9 +1,21 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
-import Header from "@/components/common/Header";
 import Providers from "@/components/common/Providers";
 import {Toaster} from "sonner";
+import {SidebarProvider} from "@/components/ui/sidebar";
+import {AppSidebar} from "@/components/common/AppSidebar";
+import AppHeader from "@/components/common/AppHeader";
+import {
+    Card,
+    CardAction,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import {ThemeProvider} from "next-themes";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -26,15 +38,40 @@ export default function AdminLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
+
+
+
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background relative z-10 flex min-h-svh flex-col overflow-hidden`}
         >
-        <Header />
-        <main>
-            <Providers>{children}</Providers>
-            <Toaster richColors position="top-right" />
-        </main>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <SidebarProvider>
+                <div className="flex min-h-screen w-screen">
+                    <AppSidebar />
+                    <div className="flex-1 flex flex-col">
+                        <AppHeader />
+                        <main className="p-4">
+                            <Providers>
+                                <Card className="w-full h-full overflow-auto">
+                                    <CardHeader className="text-xl font-semibold">Dashboard</CardHeader>
+                                    <CardContent>
+                                        {children}
+                                    </CardContent>
+                                </Card>
+                            </Providers>
+                            <Toaster richColors position="top-right" />
+                        </main>
+                    </div>
+                </div>
+            </SidebarProvider>
+        </ThemeProvider>
+
         </body>
         </html>
     );
