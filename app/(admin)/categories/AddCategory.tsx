@@ -1,3 +1,5 @@
+
+
 import { Button } from "@/components/ui/button";
 import {
   DialogClose,
@@ -30,7 +32,9 @@ const formSchema = z.object({
 });
 
 const AddCategory: React.FC<AddCategoryProps> = ({ mutation }) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+    const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
@@ -41,9 +45,23 @@ const AddCategory: React.FC<AddCategoryProps> = ({ mutation }) => {
     mutation.mutate(values);
   };
 
+    const handleOpenAutoFocus = (e: Event) => {
+        e.preventDefault();
+        form.reset({ title: "" });
+        queueMicrotask(() => inputRef.current?.focus());
+    };
+
+    React.useEffect(() => {
+        if (mutation.isSuccess) {
+            form.reset({ title: "" });
+        }
+    }, [mutation.isSuccess, form]);
+
+
+
   return (
     <Form {...form}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent onOpenAutoFocus={handleOpenAutoFocus} className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add/Edit Category</DialogTitle>
           <DialogDescription>Create and Edit category.</DialogDescription>
@@ -61,6 +79,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({ mutation }) => {
                     type="text"
                     placeholder="Enter Title"
                     {...field}
+                      ref={inputRef}
                   />
                 </FormControl>
                 <FormMessage />
@@ -86,4 +105,5 @@ const AddCategory: React.FC<AddCategoryProps> = ({ mutation }) => {
   );
 };
 
+// @ts-ignore
 export default AddCategory;

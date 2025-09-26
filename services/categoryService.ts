@@ -15,3 +15,10 @@ export const createCategory = async (categoryRequest: CategoryRequest) => {
   );
   return response.data;
 };
+
+export const deleteCategory = async (categoryId: number|null) => {
+    const response = await axios.delete(
+        `${BASE_API_URL}/category/delete?categoryId=${categoryId}`,
+    );
+    return response.data;
+};

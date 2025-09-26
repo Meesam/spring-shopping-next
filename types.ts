@@ -27,6 +27,7 @@ export interface CategoryResponse {
   id: number;
   title: string;
   createdAt: string;
+  isActive:boolean;
 }
 
 export interface CategoryRequest {

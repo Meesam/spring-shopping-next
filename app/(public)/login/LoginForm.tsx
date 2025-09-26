@@ -27,6 +27,7 @@ import {loginUser} from "@/services/authService";
 import {BiLoaderAlt} from "react-icons/bi";
 import {toast} from "sonner";
 import { useRouter } from 'next/navigation';
+import { cookies } from "next/headers";
 
 const formSchema = z.object({
     email: z.email({
@@ -70,6 +71,7 @@ const LoginForm = () => {
             toast.error(errorMessage);
         }
         if (mutation.isSuccess) {
+            debugger
             toast.success("Login successful!");
             const user = mutation.data as LoginResponse;
             localStorage.setItem("accessToken", user.accessToken);
@@ -134,8 +136,8 @@ const LoginForm = () => {
                                 />
                                 <div className="flex items-center">
                                     <a
-                                        href="#"
-                                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                                        href="/forgotpassword"
+                                        className="ml-auto inline-block text-xs underline-offset-4 hover:underline"
                                     >
                                         Forgot your password?
                                     </a>
