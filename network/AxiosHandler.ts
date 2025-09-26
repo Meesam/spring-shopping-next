@@ -6,7 +6,7 @@ axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    // Check if error is 401 and not already retried
+    // Check if the error is 401 and not already retried
     if (
       error.response &&
       error.response.status === 401 &&
