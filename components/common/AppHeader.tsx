@@ -9,7 +9,7 @@ import {
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar"
-import { GrSun , GrNotification } from "react-icons/gr";
+import { GrNotification } from "react-icons/gr";
 import {Separator} from "@/components/ui/separator";
 import {Input} from "@/components/ui/input";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";

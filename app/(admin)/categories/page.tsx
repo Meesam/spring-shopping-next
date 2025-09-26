@@ -1,6 +1,10 @@
+import Categories from "./Categories";
+
 const CategoriesPage = () => {
     return (
-        <div className="flex items-center justify-center">Categories Page</div>
+        <div>
+            <Categories />
+        </div>
     )
 }
 
