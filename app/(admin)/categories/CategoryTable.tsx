@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import type { CategoryTableProps } from "@/types";
 import {
   type PaginationState,
@@ -27,7 +26,7 @@ import { HiChevronUpDown } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
 
 const CategoryTable: React.FC<CategoryTableProps> = ({
-  data,
+  data = [],
   columns,
   isPending,
 }) => {

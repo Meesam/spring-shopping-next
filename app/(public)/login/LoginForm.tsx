@@ -71,7 +71,6 @@ const LoginForm = () => {
             toast.error(errorMessage);
         }
         if (mutation.isSuccess) {
-            debugger
             toast.success("Login successful!");
             const user = mutation.data as LoginResponse;
             localStorage.setItem("accessToken", user.accessToken);

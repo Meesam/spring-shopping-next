@@ -37,7 +37,11 @@ import {
 } from "@/components/ui/dialog"
 import {BiLoaderAlt} from "react-icons/bi";
 
-const Categories = () => {
+interface CategoryClientProps {
+    initialData: CategoryResponse[]
+}
+
+const Categories:React.FC<CategoryClientProps> = ({initialData}) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deletedId, setDeletedId] = useState<number | null>(null);
     const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -45,6 +49,7 @@ const Categories = () => {
     const {isPending, isError, data, error} = useQuery({
         queryKey: ["categories"],
         queryFn: fetchCategories,
+        initialData
     });
 
     const mutation = useMutation({
@@ -210,7 +215,7 @@ const Categories = () => {
                 <CardContent>
                     <CategoryTable
                         {...{
-                            data: data as CategoryResponse[],
+                            data: data,
                             columns,
                             isPending,
                         }}
