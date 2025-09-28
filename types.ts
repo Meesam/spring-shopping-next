@@ -6,6 +6,30 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password:string;
+}
+
+export interface ChangePasswordRequest {
+  email: string;
+  password:string;
+}
+
+export interface ActivateUserByOtpRequest {
+  otp: string;
+  email: string;
+}
+
+export interface NewOtpRequest{
+  email:string;
+}
+
+export interface ForgotPasswordRequest{
+  email:string;
+}
+
 export interface User {
   id: number;
   name: string;

@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import {useMutation} from "@tanstack/react-query";
-import {LoginRequest, LoginResponse} from "@/types";
-import {loginUser} from "@/services/authService";
+import {ForgotPasswordRequest, LoginRequest, LoginResponse} from "@/types";
+import {forgotPassword, loginUser} from "@/services/authService";
 import {BiLoaderAlt} from "react-icons/bi";
 import {toast} from "sonner";
 import { useRouter } from 'next/navigation';
@@ -34,25 +34,19 @@ const formSchema = z.object({
     email: z.email({
         message: "Invalid email address.",
     }),
-    password: z.string().min(5, {
-        message: "Password must be at least 5 characters.",
-    }),
 });
 
-const LoginForm = () => {
-    const router = useRouter();
-
+const ForgotPasswordForm = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
-            password: "",
         },
     });
 
     const mutation = useMutation({
-        mutationFn: (loginRequest: LoginRequest) => {
-            return loginUser(loginRequest);
+        mutationFn: (forgotPasswordRequest: ForgotPasswordRequest) => {
+            return forgotPassword(forgotPasswordRequest);
         },
     });
 
@@ -71,19 +65,9 @@ const LoginForm = () => {
             toast.error(errorMessage);
         }
         if (mutation.isSuccess) {
-            debugger
-            toast.success("Login successful!");
-            const user = mutation.data as LoginResponse;
-            localStorage.setItem("accessToken", user.accessToken);
-            localStorage.setItem("accessTokenExpiresAt", user.accessTokenExpiresAt);
-            localStorage.setItem("refreshToken", user.refreshToken);
-            localStorage.setItem("refreshTokenExpiresAt", user.refreshTokenExpiresAt);
-            localStorage.setItem("user", JSON.stringify(user.user));
-            router.push('/dashboard');
+            toast.success("An reset password link has been sent to your email. Please check your email and follow the instructions to reset your password.");
         }
-    }, [mutation]);
-
-    console.log("mutation on login",mutation);
+    }, [mutation.isError, mutation.isSuccess, mutation.error]);
 
     return (<div className="flex items-center justify-center h-screen overflow-hidden">
         <Form {...form}>
@@ -93,7 +77,7 @@ const LoginForm = () => {
             >
                 <Card>
                     <CardHeader>
-                        <CardTitle>Login to your account</CardTitle>
+                        <CardTitle>Forgot Password</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-col gap-6">
@@ -117,34 +101,6 @@ const LoginForm = () => {
                                     )}
                                 />
                             </div>
-                            <div className="grid gap-2">
-                                <FormField
-                                    control={form.control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Password</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    id="password"
-                                                    type="password"
-                                                    placeholder="Enter your password"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <div className="flex items-center">
-                                    <a
-                                        href="/forgotpassword"
-                                        className="ml-auto inline-block text-xs underline-offset-4 hover:underline"
-                                    >
-                                        Forgot your password?
-                                    </a>
-                                </div>
-                            </div>
                         </div>
                     </CardContent>
                     <CardFooter className="flex-col gap-2">
@@ -154,7 +110,7 @@ const LoginForm = () => {
                             disabled={mutation.isPending}
                         >
                             {mutation.isPending && <BiLoaderAlt className="animate-spin" />}
-                            Login
+                            Submit
                         </Button>
                         <div className="flex items-center justify-center gap-1">
                             <small>Don't have an account?</small>
@@ -168,4 +124,4 @@ const LoginForm = () => {
     </div>)
 };
 
-export default LoginForm;
+export default ForgotPasswordForm;

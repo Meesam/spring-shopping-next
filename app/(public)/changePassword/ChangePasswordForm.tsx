@@ -22,12 +22,11 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import {useMutation} from "@tanstack/react-query";
-import {LoginRequest, LoginResponse} from "@/types";
-import {loginUser} from "@/services/authService";
+import {ChangePasswordRequest, User} from "@/types";
+import {changePassword} from "@/services/authService";
 import {BiLoaderAlt} from "react-icons/bi";
 import {toast} from "sonner";
 import { useRouter } from 'next/navigation';
-import { cookies } from "next/headers";
 import Link from "next/link";
 
 const formSchema = z.object({
@@ -37,9 +36,15 @@ const formSchema = z.object({
     password: z.string().min(5, {
         message: "Password must be at least 5 characters.",
     }),
+    confirmPassword: z.string().min(5, {
+        message: "Password must be at least 5 characters.",
+    })
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"], // path of error
 });
 
-const LoginForm = () => {
+const ChangePasswordForm = () => {
     const router = useRouter();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -47,12 +52,13 @@ const LoginForm = () => {
         defaultValues: {
             email: "",
             password: "",
+            confirmPassword: ""
         },
     });
 
     const mutation = useMutation({
-        mutationFn: (loginRequest: LoginRequest) => {
-            return loginUser(loginRequest);
+        mutationFn: (changePasswordRequest: ChangePasswordRequest) => {
+            return changePassword(changePasswordRequest);
         },
     });
 
@@ -65,25 +71,19 @@ const LoginForm = () => {
             const errorMessage =
                 (mutation.error &&
                     typeof mutation.error === "object" &&
-                    "message" in mutation.error &&
-                    mutation.error?.message) ||
+                    "response" in mutation.error &&
+                    // @ts-expect-error: response may exist on AxiosError
+                    mutation.error.response?.data?.message) ||
                 "Something went wrong";
             toast.error(errorMessage);
         }
         if (mutation.isSuccess) {
-            debugger
-            toast.success("Login successful!");
-            const user = mutation.data as LoginResponse;
-            localStorage.setItem("accessToken", user.accessToken);
-            localStorage.setItem("accessTokenExpiresAt", user.accessTokenExpiresAt);
-            localStorage.setItem("refreshToken", user.refreshToken);
-            localStorage.setItem("refreshTokenExpiresAt", user.refreshTokenExpiresAt);
-            localStorage.setItem("user", JSON.stringify(user.user));
-            router.push('/dashboard');
+            toast.success("Password is changed, go to your registered email inbox and activate your account with OTP!");
+            const user = mutation.data as User;
+            localStorage.setItem("temp-email",user.email);
+            router.push('/activateaccount');
         }
     }, [mutation]);
-
-    console.log("mutation on login",mutation);
 
     return (<div className="flex items-center justify-center h-screen overflow-hidden">
         <Form {...form}>
@@ -93,7 +93,7 @@ const LoginForm = () => {
             >
                 <Card>
                     <CardHeader>
-                        <CardTitle>Login to your account</CardTitle>
+                        <CardTitle>Reset Password</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-col gap-6">
@@ -136,14 +136,26 @@ const LoginForm = () => {
                                         </FormItem>
                                     )}
                                 />
-                                <div className="flex items-center">
-                                    <a
-                                        href="/forgotpassword"
-                                        className="ml-auto inline-block text-xs underline-offset-4 hover:underline"
-                                    >
-                                        Forgot your password?
-                                    </a>
-                                </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Confirm Password</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    id="confirmPassword"
+                                                    type="password"
+                                                    placeholder="Enter your password"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
                         </div>
                     </CardContent>
@@ -154,11 +166,11 @@ const LoginForm = () => {
                             disabled={mutation.isPending}
                         >
                             {mutation.isPending && <BiLoaderAlt className="animate-spin" />}
-                            Login
+                            Submit
                         </Button>
                         <div className="flex items-center justify-center gap-1">
-                            <small>Don't have an account?</small>
-                            <Link href="/register" className="text-sm font-semibold text-blue-600">Register</Link>
+                            <small>Already have an account?</small>
+                            <Link href="/login" className="text-sm font-semibold text-blue-600">Login</Link>
                         </div>
 
                     </CardFooter>
@@ -168,4 +180,4 @@ const LoginForm = () => {
     </div>)
 };
 
-export default LoginForm;
+export default ChangePasswordForm;
