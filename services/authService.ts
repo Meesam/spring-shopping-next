@@ -22,6 +22,12 @@ const setCookies = async (data: LoginResponse) => {
     });
 }
 
+const removeCookies = async () => {
+    const cookieStore = await cookies();
+    cookieStore.delete('access_token');
+    cookieStore.delete('refresh_token');
+}
+
 export const loginUser = async (loginRequest: LoginRequest) => {
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/login`, loginRequest);
@@ -69,6 +75,7 @@ export const activateUserByOtp = async (activateUserByOtpRequest: ActivateUserBy
 export const logoutUser = async () => {
     try {
         await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/logout`);
+        await removeCookies()
     } catch (error) {
         if (axios.isAxiosError(error)) {
             const message = error.response?.data?.message || error.message || "Logout failed";
@@ -98,18 +105,22 @@ export const forgotPassword = async (forgotPasswordRequest: ForgotPasswordReques
     } catch (error) {
         if (axios.isAxiosError(error)) {
             const message = error.response?.data?.message || error.message || "Forgot password failed";
+            throw new Error(message);
         }
+        throw new Error("An unexpected error occurred during forgotPassword");
     }
 }
 
-export const changePassword = async (changePasswordRequest: ChangePasswordRequest) => {
+export const resetPassword = async (changePasswordRequest: ChangePasswordRequest) => {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/changePassword`, changePasswordRequest);
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/resetPassword`, changePasswordRequest);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
             const message = error.response?.data?.message || error.message || "Reset password failed";
+            throw new Error(message);
         }
+        throw new Error("An unexpected error occurred during changePassword");
     }
 }
 
@@ -120,6 +131,8 @@ export const generateNewOtp = async (newOtpRequest: NewOtpRequest) => {
     } catch (error) {
         if (axios.isAxiosError(error)) {
             const message = error.response?.data?.message || error.message || "Generate NewOtp failed";
+            throw new Error(message);
         }
+        throw new Error("An unexpected error occurred during changePassword");
     }
 }

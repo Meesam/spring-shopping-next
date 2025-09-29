@@ -14,7 +14,7 @@ export interface RegisterRequest {
 
 export interface ChangePasswordRequest {
   email: string;
-  password:string;
+  newPassword:string;
 }
 
 export interface ActivateUserByOtpRequest {

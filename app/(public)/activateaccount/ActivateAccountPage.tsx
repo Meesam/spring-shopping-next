@@ -73,7 +73,6 @@ const ActivateAccountPage = () => {
     };
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
-        debugger
         const payload = {
             ...values,
             email: localStorage.getItem("temp-email") || ""
@@ -83,7 +82,6 @@ const ActivateAccountPage = () => {
 
     React.useEffect(() => {
         if (mutation.isError) {
-            debugger
             const errorMessage =
                 (mutation.error &&
                     typeof mutation.error === "object" &&

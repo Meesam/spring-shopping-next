@@ -23,7 +23,7 @@ import {
 import { useForm } from "react-hook-form";
 import {useMutation} from "@tanstack/react-query";
 import {ChangePasswordRequest, User} from "@/types";
-import {changePassword} from "@/services/authService";
+import {resetPassword} from "@/services/authService";
 import {BiLoaderAlt} from "react-icons/bi";
 import {toast} from "sonner";
 import { useRouter } from 'next/navigation';
@@ -33,13 +33,13 @@ const formSchema = z.object({
     email: z.email({
         message: "Invalid email address.",
     }),
-    password: z.string().min(5, {
+    newPassword: z.string().min(5, {
         message: "Password must be at least 5 characters.",
     }),
     confirmPassword: z.string().min(5, {
         message: "Password must be at least 5 characters.",
     })
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"], // path of error
 });
@@ -51,18 +51,20 @@ const ChangePasswordForm = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
-            password: "",
+            newPassword: "",
             confirmPassword: ""
         },
     });
 
     const mutation = useMutation({
         mutationFn: (changePasswordRequest: ChangePasswordRequest) => {
-            return changePassword(changePasswordRequest);
+            return resetPassword(changePasswordRequest);
         },
     });
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
+        // @ts-ignore
+        delete values.confirmPassword;
         mutation.mutate(values);
     };
 
@@ -71,19 +73,27 @@ const ChangePasswordForm = () => {
             const errorMessage =
                 (mutation.error &&
                     typeof mutation.error === "object" &&
-                    "response" in mutation.error &&
-                    // @ts-expect-error: response may exist on AxiosError
-                    mutation.error.response?.data?.message) ||
+                    "message" in mutation.error &&
+                    mutation.error?.message) ||
                 "Something went wrong";
             toast.error(errorMessage);
         }
         if (mutation.isSuccess) {
             toast.success("Password is changed, go to your registered email inbox and activate your account with OTP!");
-            const user = mutation.data as User;
-            localStorage.setItem("temp-email",user.email);
+            localStorage.setItem("temp-email",form.getValues().email);
             router.push('/activateaccount');
         }
-    }, [mutation]);
+    }, [mutation.isError, mutation.isSuccess, mutation.error, router]);
+
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailParam = urlParams.get('email');
+            if (emailParam) {
+                form.reset({ email: emailParam });
+            }
+        }
+    }, []);
 
     return (<div className="flex items-center justify-center h-screen overflow-hidden">
         <Form {...form}>
@@ -110,6 +120,7 @@ const ChangePasswordForm = () => {
                                                     type="email"
                                                     placeholder="Enter your email"
                                                     {...field}
+                                                    disabled
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -120,13 +131,13 @@ const ChangePasswordForm = () => {
                             <div className="grid gap-2">
                                 <FormField
                                     control={form.control}
-                                    name="password"
+                                    name="newPassword"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Password</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    id="password"
+                                                    id="newPassword"
                                                     type="password"
                                                     placeholder="Enter your password"
                                                     {...field}

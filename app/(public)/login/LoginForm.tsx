@@ -71,19 +71,12 @@ const LoginForm = () => {
             toast.error(errorMessage);
         }
         if (mutation.isSuccess) {
-            debugger
             toast.success("Login successful!");
             const user = mutation.data as LoginResponse;
-            localStorage.setItem("accessToken", user.accessToken);
-            localStorage.setItem("accessTokenExpiresAt", user.accessTokenExpiresAt);
-            localStorage.setItem("refreshToken", user.refreshToken);
-            localStorage.setItem("refreshTokenExpiresAt", user.refreshTokenExpiresAt);
             localStorage.setItem("user", JSON.stringify(user.user));
             router.push('/dashboard');
         }
     }, [mutation]);
-
-    console.log("mutation on login",mutation);
 
     return (<div className="flex items-center justify-center h-screen overflow-hidden">
         <Form {...form}>
