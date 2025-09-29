@@ -5,13 +5,13 @@ import {
     ForgotPasswordRequest,
     LoginRequest,
     LoginResponse,
-    NewOtpRequest,
+    NewOtpRequest, RefreshTokenRequest,
     RegisterRequest
 } from "@/types";
-import axios from "axios";
+import axios from "@/network/AxiosHandler";
 import {cookies} from "next/headers";
 
-const setCookies = async (data: LoginResponse) => {
+export const setCookies = async (data: LoginResponse) => {
     (await cookies()).set("access_token", data.accessToken, {
         httpOnly: true, secure: true, sameSite: "lax", path: "/",
         expires: new Date(data.accessTokenExpiresAt),
@@ -22,7 +22,7 @@ const setCookies = async (data: LoginResponse) => {
     });
 }
 
-const removeCookies = async () => {
+export const removeCookies = async () => {
     const cookieStore = await cookies();
     cookieStore.delete('access_token');
     cookieStore.delete('refresh_token');
@@ -85,9 +85,9 @@ export const logoutUser = async () => {
     }
 }
 
-export const refreshToken = async () => {
+export const refreshToken = async (refreshTokenRequest:RefreshTokenRequest) => {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/refresh`);
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/refresh`,{refreshTokenRequest});
         await setCookies(response.data)
         return response.data;
     } catch (error) {

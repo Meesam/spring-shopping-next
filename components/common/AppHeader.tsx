@@ -14,6 +14,14 @@ import {Separator} from "@/components/ui/separator";
 import {Input} from "@/components/ui/input";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {ModeToggle} from "@/components/common/ModeToggle";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const AppHeader = () => {
     return (
@@ -41,15 +49,20 @@ const AppHeader = () => {
                             </NavigationMenuItem>
                             <Separator orientation="vertical" />
                             <NavigationMenuItem className="cursor-pointer">
-                                <Popover>
-                                    <PopoverTrigger>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger>
                                         <Avatar>
                                             <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
                                             <AvatarFallback>CN</AvatarFallback>
                                         </Avatar>
-                                    </PopoverTrigger>
-                                    <PopoverContent>Place content for the popover here.</PopoverContent>
-                                </Popover>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem>Profile</DropdownMenuItem>
+                                        <DropdownMenuItem>Logout</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>

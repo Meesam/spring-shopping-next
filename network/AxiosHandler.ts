@@ -1,47 +1,47 @@
+"use server"
+
 import type { LoginResponse } from "@/types";
 import axios from "axios";
+import {cookies} from "next/headers";
+import {refreshToken, removeCookies, setCookies} from "@/services/authService";
+
 const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+const getRefreshAuthToken = async ()=> {
+    const cookieStore = await cookies()
+    return cookieStore.get('refresh_token')?.value
+}
+
+const getAccessToken = async () => {
+    const cookieStore = await cookies()
+    return cookieStore.get('access_token')?.value
+}
 
 axios.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    debugger
+      const originalRequest = error.config;
     // Check if the error is 401 and not already retried
     if (
       error.response &&
       error.response.status === 401 &&
       !originalRequest._retry
     ) {
-      originalRequest._retry = true;
+      //originalRequest._retry = true;
       try {
-        // Attempt to refresh token
-        const refreshToken = localStorage.getItem("refreshToken");
-        const res = await axios.post(`${BASE_API_URL}/auth/refresh`, {
-          token: refreshToken,
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization':''
-          }
-        });
+        // Attempt to refresh a token
+        const refToken = await getRefreshAuthToken() || ""
+        const res = await refreshToken({token: refToken})
         const user = res.data as LoginResponse;
-
-          localStorage.setItem("accessToken", user.accessToken);
-          localStorage.setItem("accessTokenExpiresAt", user.accessTokenExpiresAt);
-          localStorage.setItem("refreshToken", user.refreshToken);
-          localStorage.setItem("refreshTokenExpiresAt", user.refreshTokenExpiresAt);
-          localStorage.setItem("user", JSON.stringify(user.user));
+          //localStorage.setItem("user", JSON.stringify(user.user));
 
         // Update Authorization header and retry original request
         originalRequest.headers.Authorization = `Bearer ${user.accessToken}`;
         return axios(originalRequest);
       } catch (refreshError) {
         // Handle refresh failure (e.g., logout user)
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("accessTokenExpiresAt");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("refreshTokenExpiresAt");
-          localStorage.removeItem("user");
+        await removeCookies();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
@@ -51,8 +51,8 @@ axios.interceptors.response.use(
 );
 
 axios.interceptors.request.use(
-  (config) => {
-   const token = localStorage.getItem("accessToken"); // Or use your preferred storage
+ async (config) => {
+   const token = await getAccessToken();
     if (token && config.url && !config.url.includes('/auth')) {
       config.headers.Authorization = `Bearer ${token}`;
     }

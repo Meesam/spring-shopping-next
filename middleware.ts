@@ -8,10 +8,11 @@ function isPublic(pathname: string) {
 }
 
 export function middleware(req: NextRequest) {
+    debugger
     const { pathname } = req.nextUrl;
     // Example: read auth from cookie (adjust name)
     const token = req.cookies.get("access_token")?.value;
-    if (!token && !isPublic(pathname)) {
+    if (token == undefined && !isPublic(pathname)) {
         const url = new URL("/login", req.url);
         url.searchParams.set("redirect", pathname);
         return NextResponse.redirect(url);
