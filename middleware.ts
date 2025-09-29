@@ -8,7 +8,6 @@ function isPublic(pathname: string) {
 }
 
 export function middleware(req: NextRequest) {
-    debugger
     const { pathname } = req.nextUrl;
     // Example: read auth from cookie (adjust name)
     const token = req.cookies.get("access_token")?.value;
