@@ -1,3 +1,5 @@
+"use client"
+
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -22,8 +24,40 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {useMutation} from "@tanstack/react-query";
+import {logoutUser} from "@/services/authService";
+import React from "react";
+import {toast} from "sonner";
+import {useRouter} from "next/navigation";
 
 const AppHeader = () => {
+    const router = useRouter();
+
+    const mutation = useMutation({
+        mutationFn: () => {
+            return logoutUser();
+        },
+    });
+    const handleLogout = async () => {
+        mutation.mutate();
+    }
+
+    React.useEffect(() => {
+        if (mutation.isError) {
+            const errorMessage =
+                (mutation.error &&
+                    typeof mutation.error === "object" &&
+                    "message" in mutation.error &&
+                    mutation.error?.message) ||
+                "Something went wrong";
+            toast.error(errorMessage);
+        }
+        if (mutation.isSuccess) {
+            toast.success("Logout successful!");
+            router.push('/login');
+        }
+    }, [mutation]);
+
     return (
         <header className="w-full sticky top-0 z-50">
             <div className="container-wrapper 3xl:fixed:px-0 px-6">
@@ -60,7 +94,7 @@ const AppHeader = () => {
                                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem>Profile</DropdownMenuItem>
-                                        <DropdownMenuItem>Logout</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </NavigationMenuItem>

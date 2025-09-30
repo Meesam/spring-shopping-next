@@ -4,19 +4,19 @@ import type { NextRequest } from "next/server";
 const PUBLIC_PATHS = ["/login", "/register", "/forgotPassword","/", "/about", "/public"];
 
 function isPublic(pathname: string) {
-    return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+    return PUBLIC_PATHS.some((p) => pathname === p);
 }
 
 export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     // Example: read auth from cookie (adjust name)
-    const token = req.cookies.get("access_token")?.value;
-    if (token == undefined && !isPublic(pathname)) {
+    const token = req.cookies.get("access_token")?.value || req.cookies.get("refresh_token")?.value ;
+    if (token === undefined && !isPublic(pathname)) {
         const url = new URL("/login", req.url);
         url.searchParams.set("redirect", pathname);
         return NextResponse.redirect(url);
     }
-    // Optional role/claims checks by decoding token here
+    // Optional role/claims checks by decoding the token here
 
     return NextResponse.next();
 }

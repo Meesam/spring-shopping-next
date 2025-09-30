@@ -8,16 +8,16 @@ import {
     NewOtpRequest, RefreshTokenRequest,
     RegisterRequest
 } from "@/types";
-import axios from "@/network/AxiosHandler";
+import axios from "axios";
 import {cookies} from "next/headers";
 
 export const setCookies = async (data: LoginResponse) => {
     (await cookies()).set("access_token", data.accessToken, {
-        httpOnly: true, secure: true, sameSite: "lax", path: "/",
+        httpOnly: false, secure: true, sameSite: "lax", path: "/",
         expires: new Date(data.accessTokenExpiresAt),
     });
     (await cookies()).set("refresh_token", data.refreshToken, {
-        httpOnly: true, secure: true, sameSite: "lax", path: "/",
+        httpOnly: false, secure: true, sameSite: "lax", path: "/",
         expires: new Date(data.refreshTokenExpiresAt),
     });
 }
@@ -26,6 +26,11 @@ export const removeCookies = async () => {
     const cookieStore = await cookies();
     cookieStore.delete('access_token');
     cookieStore.delete('refresh_token');
+}
+
+const getRefreshToken = async () => {
+    const cookieStore = await cookies()
+    return cookieStore.get('refresh_token')?.value
 }
 
 export const loginUser = async (loginRequest: LoginRequest) => {
@@ -74,8 +79,10 @@ export const activateUserByOtp = async (activateUserByOtpRequest: ActivateUserBy
 
 export const logoutUser = async () => {
     try {
-        await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/logout`);
+        const refreshToken= await getRefreshToken()
+        await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/logout`,{token: refreshToken});
         await removeCookies()
+        return true;
     } catch (error) {
         if (axios.isAxiosError(error)) {
             const message = error.response?.data?.message || error.message || "Logout failed";

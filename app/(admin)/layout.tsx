@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type {Metadata} from "next";
+import {Geist, Geist_Mono} from "next/font/google";
 import "../globals.css";
 import Providers from "@/components/common/Providers";
 import {Toaster} from "sonner";
@@ -35,11 +35,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({
-                                       children,
-                                   }: Readonly<{
+                                        children,
+                                    }: Readonly<{
     children: React.ReactNode;
 }>) {
-
 
 
     return (
@@ -53,27 +52,28 @@ export default function AdminLayout({
             enableSystem
             disableTransitionOnChange
         >
-            <SidebarProvider>
-                <div className="flex min-h-screen w-screen">
-                    <AppSidebar />
-                    <div className="flex-1 flex flex-col">
-                        <AppHeader />
-                        <main className="p-4">
-                            <Providers>
+            <Providers>
+                <SidebarProvider>
+                    <div className="flex min-h-screen w-screen">
+                        <AppSidebar/>
+                        <div className="flex-1 flex flex-col">
+                            <AppHeader/>
+                            <main className="p-4">
                                 <Card className="w-full h-full overflow-auto">
                                     <CardHeader className="text-xl font-semibold">
-                                        <PathNameClientComponent />
+                                        <PathNameClientComponent/>
                                     </CardHeader>
                                     <CardContent>
                                         {children}
                                     </CardContent>
                                 </Card>
-                            </Providers>
-                            <Toaster richColors position="top-right" />
-                        </main>
+
+                                <Toaster richColors position="top-right"/>
+                            </main>
+                        </div>
                     </div>
-                </div>
-            </SidebarProvider>
+                </SidebarProvider>
+            </Providers>
         </ThemeProvider>
 
         </body>
