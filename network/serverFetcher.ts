@@ -1,10 +1,10 @@
-// utils/serverFetcher.ts (Server-side ONLY)
 
-import { cookies } from 'next/headers'; // App Router Server API
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import {renewTokensAction} from "@/actions/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
 
 // Simplified type for fetch options
 interface CustomFetchOptions extends RequestInit {
@@ -14,8 +14,8 @@ interface CustomFetchOptions extends RequestInit {
 export async function serverFetch(url: string, options: CustomFetchOptions = {}): Promise<Response> {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access_token')?.value;
-    const headers = new Headers(options.headers);
 
+    const headers = new Headers(options.headers);
     if (accessToken) {
         headers.set('Authorization', `Bearer ${accessToken}`);
     }
@@ -28,14 +28,12 @@ export async function serverFetch(url: string, options: CustomFetchOptions = {})
         options.isRetry = true;
 
         // 3. Call the internal Route Handler to perform the refresh and cookie modification
-        const refreshResponse = await fetch(`${BASE_URL}/api/auth/internal-refresh`, { method: 'POST' });
+        const renewalResult = await renewTokensAction();
 
-        if (refreshResponse.ok) {
+        if (renewalResult.success) {
             // Refresh succeeded, new cookies are set, get the new token to retry
-            const data = await refreshResponse.json();
-
             // 4. Retry Original Request with the new token
-            headers.set('Authorization', `Bearer ${data.newAccessToken}`);
+            headers.set('Authorization', `Bearer ${renewalResult.newAccessToken}`);
             response = await fetch(`${API_BASE_URL}${url}`, { ...options, headers });
         } else {
             // Refresh failed (refresh token expired or invalid)
@@ -45,7 +43,9 @@ export async function serverFetch(url: string, options: CustomFetchOptions = {})
 
     // Final check for unhandled errors
     if (!response.ok) {
-        throw new Error(`API call failed with status: ${response.status}`);
+        redirect('/login');
+        //throw new Error(`API call failed with status: ${response.status}`);
+
     }
 
     return response;

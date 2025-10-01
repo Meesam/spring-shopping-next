@@ -9,6 +9,8 @@ export async function POST(request: NextRequest) {
     const cookieStore = await cookies();
     const refreshToken = cookieStore.get('refresh_token')?.value;
 
+    console.log('POST', refreshToken)
+
     if (!refreshToken) {
         return NextResponse.json({ message: 'No refresh token' }, { status: 401 });
     }
@@ -20,6 +22,7 @@ export async function POST(request: NextRequest) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: refreshToken }),
         });
+        console.log('POST', await apiResponse.json())
 
         if (!apiResponse.ok) {
             // Throw to jump to catch block
@@ -29,7 +32,7 @@ export async function POST(request: NextRequest) {
         const { accessToken, refreshToken: newRefreshToken } = await apiResponse.json();
 
         // 2. 🔑 SUCCESS: Modify cookies (ALLOWED in Route Handler)
-        cookieStore.set('access_token', accessToken, { path: '/', maxAge: 60 * 60 * 24 });
+        cookieStore.set('access_token', accessToken, { path: '/', maxAge: 60 });
         cookieStore.set('refresh_token', newRefreshToken, { path: '/', httpOnly: true, maxAge: 60 * 60 * 24 * 30 });
 
         return NextResponse.json({ success: true, newAccessToken: accessToken }, { status: 200 });
