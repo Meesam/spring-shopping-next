@@ -72,8 +72,6 @@ const LoginForm = () => {
         }
         if (mutation.isSuccess) {
             toast.success("Login successful!");
-            const user = mutation.data as LoginResponse;
-            localStorage.setItem("user", JSON.stringify(user.user));
             router.push('/dashboard');
         }
     }, [mutation]);

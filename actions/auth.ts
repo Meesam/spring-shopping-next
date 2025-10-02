@@ -12,7 +12,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
  * If successful, modifies the cookies to set the new tokens.
  */
 export async function renewTokensAction(): Promise<{ success: boolean; message: string, newAccessToken:string  }> {
-    debugger
     const refresh_token = (await cookies()).get('refresh_token')?.value;
 
     // 1. Check if the Refresh Token exists

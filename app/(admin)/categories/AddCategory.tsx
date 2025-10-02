@@ -1,4 +1,4 @@
-
+"use client"
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,23 +31,28 @@ const formSchema = z.object({
   }),
 });
 
-const AddCategory: React.FC<AddCategoryProps> = ({ mutation }) => {
+const AddCategory: React.FC<AddCategoryProps> = ({ mutation, category }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues:  {
       title: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    mutation.mutate(values);
+      const payload = {
+          ...values,
+          id: category?.id
+      }
+      mutation.mutate(payload);
   };
 
     const handleOpenAutoFocus = (e: Event) => {
         e.preventDefault();
-        form.reset({ title: "" });
+        const title = category?.title || ""
+        form.reset({ title: title });
         queueMicrotask(() => inputRef.current?.focus());
     };
 
@@ -57,13 +62,19 @@ const AddCategory: React.FC<AddCategoryProps> = ({ mutation }) => {
         }
     }, [mutation.isSuccess, form]);
 
-
+    React.useEffect(()=>{
+        if(category){
+            form.reset({ title: category.title });
+        }else {
+            form.reset({ title: "" });
+        }
+    },[category, form])
 
   return (
     <Form {...form}>
       <DialogContent onOpenAutoFocus={handleOpenAutoFocus} className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add/Edit Category</DialogTitle>
+          <DialogTitle>{`${category ? "Edit" : "Add"} Category`}</DialogTitle>
           <DialogDescription>Create and Edit category.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-2">

@@ -6,18 +6,8 @@ import {Toaster} from "sonner";
 import {SidebarProvider} from "@/components/ui/sidebar";
 import {AppSidebar} from "@/components/common/AppSidebar";
 import AppHeader from "@/components/common/AppHeader";
-import {
-    Card,
-    CardAction,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
 import {ThemeProvider} from "next-themes";
-import ExampleClientComponent from "@/components/common/PathName";
-import PathNameClientComponent from "@/components/common/PathName";
+
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -59,15 +49,7 @@ export default function AdminLayout({
                         <div className="flex-1 flex flex-col">
                             <AppHeader/>
                             <main className="p-4">
-                                <Card className="w-full h-full overflow-auto">
-                                    <CardHeader className="text-xl font-semibold">
-                                        <PathNameClientComponent/>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {children}
-                                    </CardContent>
-                                </Card>
-
+                                {children}
                                 <Toaster richColors position="top-right"/>
                             </main>
                         </div>

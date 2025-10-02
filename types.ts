@@ -60,6 +60,7 @@ export interface CategoryResponse {
 
 export interface CategoryRequest {
   title: string;
+  id?:number;
 }
 export interface CategoryTableProps {
   data: CategoryResponse[];
@@ -81,6 +82,7 @@ export interface ProductTableProps {
 
 export interface AddCategoryProps {
   mutation: UseMutationResult<unknown, Error, CategoryRequest, unknown>;
+  category?:CategoryRequest | undefined;
 }
 
 export interface AddAttributeProps {

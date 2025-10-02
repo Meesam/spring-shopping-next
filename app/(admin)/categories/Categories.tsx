@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import React, {useState} from "react";
-import {createCategory, deleteCategory, fetchCategories} from "@/services/categoryService";
+import {createCategory, deleteCategory, fetchCategories, updateCategory} from "@/services/categoryService";
 import type {CategoryRequest, CategoryResponse} from "@/types";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {type ColumnDef} from "@tanstack/react-table";
@@ -16,7 +16,7 @@ import {
     CardAction,
     CardContent,
     CardFooter,
-    CardHeader,
+    CardHeader, CardTitle,
 } from "@/components/ui/card";
 import {toast} from "sonner";
 import CategoryTable from "./CategoryTable";
@@ -24,7 +24,7 @@ import AddCategory from "./AddCategory";
 import moment from "moment";
 import {
     DropdownMenu,
-    DropdownMenuContent,
+    DropdownMenuContent, DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -46,18 +46,24 @@ const Categories:React.FC<CategoryClientProps> = ({initialData}) => {
     const [deletedId, setDeletedId] = useState<number | null>(null);
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const queryClient = useQueryClient();
+    const[existingCategory, setExistingCategory] = useState<CategoryRequest | undefined>(undefined);
     const {isPending, isError, data, error} = useQuery({
         queryKey: ["categories"],
         queryFn: fetchCategories,
-        initialData
+        initialData,
+        staleTime: 1000 * 60 * 5
     });
 
     const mutation = useMutation({
         mutationFn: (categoryRequest: CategoryRequest) => {
-            return createCategory(categoryRequest);
+            if(categoryRequest.id){
+                return updateCategory(categoryRequest);
+            }else {
+                return createCategory(categoryRequest);
+            }
         },
         onSuccess() {
-            toast.success("Category created successfully");
+            toast.success(`Category updated successfully`);
             queryClient.invalidateQueries({queryKey: ["categories"]});
             setDialogOpen(false);
         },
@@ -101,6 +107,15 @@ const Categories:React.FC<CategoryClientProps> = ({initialData}) => {
     }
     const handleDelete = () => {
         deleteMutation.mutate()
+    }
+
+    const handleCategoryEdit =(id:number, title:string)=>{
+        setDialogOpen(true)
+        let payload:CategoryRequest = {
+            id: id,
+            title: title
+        }
+        setExistingCategory(payload)
     }
 
     const columns = React.useMemo<ColumnDef<CategoryResponse>[]>(
@@ -148,8 +163,8 @@ const Categories:React.FC<CategoryClientProps> = ({initialData}) => {
                             <GrMoreVertical/>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuLabel className="cursor-pointer"
-                                               onClick={() => handleCategoryDelete(info.row.original.id)}>Delete</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => handleCategoryEdit(info.row.original.id, info.row.original.title)}>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleCategoryDelete(info.row.original.id)}>Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ),
@@ -169,6 +184,11 @@ const Categories:React.FC<CategoryClientProps> = ({initialData}) => {
                 error.response?.data?.message) ||
             "Something went wrong";
         return toast.error(errorMessage);
+    }
+
+    const handleDialogOpenChange = (open: boolean) => {
+        setExistingCategory(undefined);
+        setDialogOpen(open)
     }
 
     return (
@@ -199,16 +219,17 @@ const Categories:React.FC<CategoryClientProps> = ({initialData}) => {
 
             <Card className="w-full">
                 <CardHeader>
-                    <CardAction className="flex flex-row gap-2 mt-10 items-start">
+                    <CardTitle className="text-lg">All Categories</CardTitle>
+                    <CardAction className="flex flex-row gap-2 items-start">
                         <Input placeholder="Search" className="w-full"/>
-                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                        <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
                             <DialogTrigger asChild>
                                 <Button variant="outline">
                                     <IoAddSharp/>
                                     Add New
                                 </Button>
                             </DialogTrigger>
-                            <AddCategory mutation={mutation}/>
+                            <AddCategory mutation={mutation} category={existingCategory}/>
                         </Dialog>
                     </CardAction>
                 </CardHeader>

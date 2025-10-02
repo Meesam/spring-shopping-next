@@ -92,19 +92,6 @@ export const logoutUser = async () => {
     }
 }
 
-export const refreshToken = async (refreshTokenRequest:RefreshTokenRequest) => {
-    try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/refresh`,{refreshTokenRequest});
-        await setCookies(response.data)
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            const message = error.response?.data?.message || error.message || "Refresh token failed";
-            throw new Error(message);
-        }
-    }
-}
-
 export const forgotPassword = async (forgotPasswordRequest: ForgotPasswordRequest) => {
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/forgotPassword`, forgotPasswordRequest);

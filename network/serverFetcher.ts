@@ -16,6 +16,7 @@ export async function serverFetch(url: string, options: CustomFetchOptions = {})
     const accessToken = cookieStore.get('access_token')?.value;
 
     const headers = new Headers(options.headers);
+    headers.set('Content-Type', `application/json`);
     if (accessToken) {
         headers.set('Authorization', `Bearer ${accessToken}`);
     }
@@ -44,7 +45,7 @@ export async function serverFetch(url: string, options: CustomFetchOptions = {})
     // Final check for unhandled errors
     if (!response.ok) {
         redirect('/login');
-        //throw new Error(`API call failed with status: ${response.status}`);
+        //throw new Error ('API call failed with status: ${response.status}`);
 
     }
 
